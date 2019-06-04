@@ -1,0 +1,35 @@
+version: '3.4'
+
+services:
+  elkexampleapi.webapi:
+    image: ${DOCKER_REGISTRY-}elkexampleapi
+    build:
+      context: .
+      dockerfile: ElkExampleApi.WebApi/Dockerfile
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
+    container_name: elastic_search
+    hostname: elastic_search
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - ALL
+    privileged: true
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    volumes:
+      - "./volumes/elasticsearch-data:/usr/share/elasticsearch/data"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.1.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
